@@ -2,19 +2,17 @@ import os
 
 
 def move_file(command: str) -> None:
-    command_list = command.replace("/", " ").split(" ")
-    _, start_f, *finish_f = command_list
-    if len(finish_f) == 1:
-        os.rename(start_f, finish_f[0])
+    command_list = command.split(" ")
+    if len(command_list) != 3 or command_list[0] != "mv":
         return
-    add_path = ""
-    for part_path in finish_f[:-1]:
-        add_path = os.path.join(add_path, part_path)
-        try:
-            os.mkdir(add_path)
-        except FileExistsError:
-            pass
-    add_path = os.path.join(add_path, finish_f[-1])
-    with open(start_f, "r") as start_obj, open(add_path, "w") as finish_obj:
+    _, source_file, destiny_file = command_list
+    if not os.path.dirname(destiny_file):
+        os.rename(source_file, destiny_file)
+        return
+
+    os.makedirs(os.path.dirname(destiny_file), exist_ok=True)
+
+    with (open(source_file, "r") as start_obj,
+          open(destiny_file, "w") as finish_obj):
         finish_obj.write(start_obj.read())
-    os.remove(start_f)
+    os.remove(source_file)
